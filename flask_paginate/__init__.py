@@ -201,8 +201,8 @@ def get_parameter(param=None, args=None, default="page"):
     if not param:
         pk = "page_parameter" if default == "page" else "per_page_parameter"
         param = args.get(pk)
-        if not param:
-            param = current_app.config.get(pk.upper())
+    if not param:
+        param = current_app.config.get(pk.upper())
 
     return param or default
 
@@ -425,11 +425,7 @@ class Pagination(object):
         args.update(request.view_args.copy())
         self.args = {}
         for k, v in args.lists():
-            if len(v) == 1:
-                self.args[k] = v[0]
-            else:
-                self.args[k] = v
-
+            self.args[k] = v[0] if len(v) == 1 else v
         self.endpoint = request.endpoint
 
     @property
@@ -480,9 +476,7 @@ class Pagination(object):
         if win_from < 1:
             win_to = win_to + 1 - win_from
             win_from = 1
-            if win_to > self.total_pages:
-                win_to = self.total_pages
-
+            win_to = min(win_to, self.total_pages)
         if win_from > self.inner_window:
             pages.extend(range(1, self.outer_window + 1 + 1))
             pages.append(None)
